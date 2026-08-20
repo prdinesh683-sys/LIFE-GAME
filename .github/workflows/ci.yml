@@ -1,0 +1,65 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # Fast, targeted gate: the Phase 6 regression audit on its own.
+  # Runs first so a Phase 6 invariant break fails within seconds.
+  phase6-audit:
+    name: Phase 6 regression audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Structural invariants (nav count, DB/sync versions, terminology)
+        run: bun run check:invariants
+
+      - name: Time & rhythm (Phase 6A)
+        run: bun run test:phase6a
+
+      - name: Visible learning (Phase 6B)
+        run: bun run test:phase6b
+
+      - name: Mature-history fixtures (Phase 6 regression)
+        run: bun run test:phase6-regression
+
+  verify:
+    name: Full verification
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Typecheck
+        run: bun run typecheck
+
+      - name: Lint
+        run: bun run lint
+
+      - name: Full test suite
+        run: bun run test
+
+      - name: Production build
+        run: bun run build
