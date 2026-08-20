@@ -636,6 +636,7 @@ export function AiStoreProvider({ children }: { children: ReactNode }) {
       if (!provider) return null;
       const state = await provider.testConnection();
       await patchProvider(id, {
+        lastStatus: state.status as "not_connected" | "connected" | "error" | "rate_limited",
         lastTestedAt: state.testedAt ?? new Date().toISOString(),
         availableModels: state.models,
       });
