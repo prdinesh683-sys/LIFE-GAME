@@ -179,6 +179,49 @@ export interface Drain {
   createdAt: string;
 }
 
+export type ProgressState =
+  | "not_started"
+  | "early"
+  | "in_progress"
+  | "substantially_complete"
+  | "blocked"
+  | "complete";
+
+export const PROGRESS_STATE_LABELS: Record<ProgressState, string> = {
+  not_started: "Not Started",
+  early: "Early Progress",
+  in_progress: "In Progress",
+  substantially_complete: "Substantially Complete",
+  blocked: "Blocked",
+  complete: "Complete",
+};
+
+export interface Chapter {
+  id: string;
+  destinationId: string;
+  title: string;
+  order: number;
+  description: string;
+  progressState: ProgressState;
+  milestoneIds: string[];
+  createdAt: string;
+}
+
+export interface MilestoneProof {
+  id: string;
+  milestoneId: string;
+  summary: string;
+  artifactRef?: string;
+  loggedAt: string;
+  verified: boolean;
+}
+
+export interface MinimumWin {
+  title: string;
+  durationMinutes: number;
+  description: string;
+}
+
 export interface Quest {
   id: string;
   name: string;
@@ -190,6 +233,8 @@ export interface Quest {
   sparks: number;
   attribute: AttributeKey;
   destinationId: string | null;
+  chapterId?: string | null;
+  milestoneId?: string | null;
   boostId: string | null;
   scheduledFor: string | null;
   /** Optional part of the day this belongs to. Absent means anytime. */
@@ -201,6 +246,8 @@ export interface Quest {
   approved: boolean;
   isRecovery: boolean;
   rushWindowSeconds: number | null;
+  /** Lowest friction micro-version of this action for low-energy/low-discipline days */
+  minimumWin?: MinimumWin | null;
   createdAt: string;
 }
 
@@ -372,11 +419,84 @@ export interface EconomyConfig {
   attributePointsPerQuest: number;
 }
 
+export type ProposalStatus = "proposed" | "validated" | "rejected" | "applied" | "reverted";
+
+export interface ChangeProposal {
+  id: string;
+  proposedBy: "ai" | "engine" | "user";
+  targetType: "destination" | "chapter" | "milestone" | "quest" | "blueprint" | "routine";
+  targetId: string | null;
+  changeType: "create" | "update" | "resize" | "split" | "archive" | "replan";
+  summary: string;
+  rationale: string;
+  evidenceSummary: string;
+  diffPayload: Record<string, unknown>;
+  status: ProposalStatus;
+  validationResult?: {
+    valid: boolean;
+    reason?: string;
+  };
+  appliedAt?: string | null;
+  createdAt: string;
+}
+
+export interface AuditEntry {
+  id: string;
+  proposalId?: string | null;
+  actor: "ai" | "engine" | "user";
+  action: string;
+  target: string;
+  reason: string;
+  previousState?: Record<string, unknown> | null;
+  newState?: Record<string, unknown> | null;
+  timestamp: string;
+}
+
+export interface DailySummary {
+  id: string; // YYYY-MM-DD
+  date: string;
+  totalMinutes: number;
+  completedQuests: string[];
+  remainingQuests: string[];
+  missedReasons: string[];
+  energyAvg: number;
+  blockers: string[];
+  compressedSummary: string;
+  createdAt: string;
+}
+
+export interface WeeklySummary {
+  id: string; // YYYY-Www
+  weekNumber: number;
+  year: number;
+  totalHours: number;
+  sessionCount: number;
+  averageSessionMinutes: number;
+  successfulPatterns: string[];
+  skippedPatterns: string[];
+  risksIdentified: string[];
+  compressedSummary: string;
+  createdAt: string;
+}
+
+export interface CampaignSummary {
+  id: string;
+  destinationId: string;
+  deadline: string;
+  currentChapter: string;
+  progressState: ProgressState;
+  strengths: string[];
+  risks: string[];
+  compressedSummary: string;
+  updatedAt: string;
+}
+
 export interface GameSnapshot {
   profile: Profile;
   settings: Settings;
   blueprint: PersonalBlueprint | null;
   destinations: Destination[];
+  chapters?: Chapter[];
   milestones: Milestone[];
   boosts: Boost[];
   drains: Drain[];
@@ -386,4 +506,8 @@ export interface GameSnapshot {
   events: ActivityEvent[];
   attributes: AttributeProgress[];
   trophies: Trophy[];
+  proposals?: ChangeProposal[];
+  dailySummaries?: DailySummary[];
+  weeklySummaries?: WeeklySummary[];
+  campaignSummaries?: CampaignSummary[];
 }

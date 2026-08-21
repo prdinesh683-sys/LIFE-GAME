@@ -2,6 +2,7 @@ import type {
   AttributeKey,
   Difficulty,
   EconomyConfig,
+  MinimumWin,
   Quest,
   QuestStatus,
   QuestType,
@@ -24,6 +25,8 @@ export interface QuestDraft {
   difficulty?: Difficulty;
   attribute?: AttributeKey;
   destinationId?: string | null;
+  chapterId?: string | null;
+  milestoneId?: string | null;
   boostId?: string | null;
   isRecovery?: boolean;
   rushWindowSeconds?: number | null;
@@ -33,6 +36,8 @@ export interface QuestDraft {
   timeWindow?: TimeWindow | null;
   /** Optional local day key (YYYY-MM-DD). */
   scheduledFor?: string | null;
+  /** Optional lowest-friction micro version */
+  minimumWin?: MinimumWin | null;
 }
 
 export const DURATION_BOUNDS: Record<QuestType, [number, number]> = {
@@ -97,6 +102,8 @@ export function materialiseQuest(
     sparks: sparksForQuest(config, duration, difficulty),
     attribute: draft.attribute ?? "focus",
     destinationId: draft.destinationId ?? null,
+    chapterId: draft.chapterId ?? null,
+    milestoneId: draft.milestoneId ?? null,
     boostId: draft.boostId ?? null,
     scheduledFor: draft.scheduledFor ?? null,
     timeWindow: draft.timeWindow ?? null,
@@ -108,6 +115,7 @@ export function materialiseQuest(
     approved: !(draft.aiGenerated ?? false),
     isRecovery: draft.isRecovery ?? false,
     rushWindowSeconds: draft.rushWindowSeconds ?? (type === "rush" ? 60 : null),
+    minimumWin: draft.minimumWin ?? null,
     createdAt: nowIso,
   };
 }

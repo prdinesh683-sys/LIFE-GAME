@@ -19,17 +19,16 @@ import type {
 
 function facts(context: PersonalContext | null): string[] {
   const out: string[] = [];
-  const c = context?.current;
+  const c = context?.currentState ?? context?.current;
+  const t = context?.today;
   if (c) {
     out.push(`Rank ${c.identity.rank} · ${c.identity.sparks} sparks · run of ${c.identity.run}`);
     out.push(`Momentum ${c.momentum}/100`);
-    if (c.state) {
-      out.push(
-        `Energy ${c.state.energy}/5, mood ${c.state.mood}/5, ${c.state.availableMinutes} min available`,
-      );
-    }
-    out.push(`${c.todayCompletions} quest(s) completed today`);
-    if (c.goalPriority) out.push(`Top destination: ${c.goalPriority}`);
+    out.push(
+      `Energy ${c.currentEnergy}/5, mood ${c.currentMood}/5, ${c.capacityMinutes} min available`,
+    );
+    if (t) out.push(`${t.completionsToday} quest(s) completed today`);
+    if (c.activeGoal) out.push(`Top destination: ${c.activeGoal}`);
   }
   const r = context?.recent;
   if (r?.completionRate != null) {

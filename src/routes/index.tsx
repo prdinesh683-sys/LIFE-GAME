@@ -348,8 +348,26 @@ function TodayPage() {
                 onClick={() => void startOption(primary)}
               >
                 <Zap className="size-5" />
-                Start this
+                Start this ({primary.durationMinutes}m)
               </Button>
+              {primary.minimumWin && (needsRecovery || (daily && (daily.energy <= 2 || daily.availableMinutes <= 15))) ? (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full border-primary/40 bg-primary/5 text-xs text-primary hover:bg-primary/10"
+                  disabled={busy !== null}
+                  onClick={() =>
+                    void startOption({
+                      ...primary,
+                      title: primary.minimumWin!.title,
+                      durationMinutes: primary.minimumWin!.durationMinutes,
+                      reason: primary.minimumWin!.description,
+                    })
+                  }
+                >
+                  ⚡ Start 5m Minimum Win: {primary.minimumWin.durationMinutes}m micro-action
+                </Button>
+              ) : null}
               <div className="flex gap-2">
                 <Button
                   variant="secondary"

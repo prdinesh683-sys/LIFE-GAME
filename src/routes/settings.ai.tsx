@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Loader2, Plug, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 
@@ -23,6 +23,7 @@ import type { ProviderId } from "@/lib/ai/types";
 import type { AiJob, AiMode, AiProviderSettings } from "@/lib/game/types";
 import { useAi } from "@/lib/services/ai-store";
 import { useGame } from "@/lib/services/game-store";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/settings/ai")({
   head: () => ({
@@ -241,9 +242,25 @@ function ProviderPanel({
   const ai = useAi();
   const [testing, setTesting] = useState(false);
   const [loadingModels, setLoadingModels] = useState(false);
+  const [customInput, setCustomInput] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [onlyFree, setOnlyFree] = useState(false);
+
   const copy = PROVIDER_COPY[id];
   const state = ai.providerStates.find((s) => s.id === id);
   const models = value.availableModels ?? [];
+
+  const isFreeModel = (m: string) => m.toLowerCase().includes(":free") || m.toLowerCase().endsWith("-free");
+  const freeModels = useMemo(() => models.filter(isFreeModel), [models]);
+  const hasFreeModels = freeModels.length > 0;
+
+  const filteredModels = useMemo(() => {
+    return models.filter((m) => {
+      if (onlyFree && !isFreeModel(m)) return false;
+      if (searchQuery.trim() && !m.toLowerCase().includes(searchQuery.trim().toLowerCase())) return false;
+      return true;
+    });
+  }, [models, onlyFree, searchQuery]);
 
   const test = async () => {
     setTesting(true);
@@ -259,6 +276,14 @@ function ProviderPanel({
   };
 
   const refreshModels = async () => {
+    if (id === "cloud" && (!value.endpoint?.trim() || !value.apiKey?.trim())) {
+      toast.error("Please configure the endpoint and API key first.");
+      return;
+    }
+    if (id !== "cloud" && !value.endpoint?.trim()) {
+      toast.error("Please configure the endpoint first.");
+      return;
+    }
     setLoadingModels(true);
     try {
       const list = await ai.loadModels(id);
@@ -308,24 +333,76 @@ function ProviderPanel({
           </>
         ) : null}
 
-        <Label className="text-xs text-muted-foreground">Model</Label>
-        {models.length ? (
-          <Select value={value.model} onValueChange={(v) => onChange({ model: v })}>
-            <SelectTrigger className="bg-background/50">
-              <SelectValue placeholder="Pick a model" />
-            </SelectTrigger>
-            <SelectContent>
-              {models.map((model) => (
-                <SelectItem key={model} value={model}>
-                  {model}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+        <div className="flex items-center justify-between">
+          <Label className="text-xs text-muted-foreground">Model</Label>
+          {models.length ? (
+            <button
+              type="button"
+              onClick={() => setCustomInput(!customInput)}
+              className="text-[11px] text-primary hover:underline cursor-pointer"
+            >
+              {customInput ? "Choose from loaded models" : "Type custom model name"}
+            </button>
+          ) : null}
+        </div>
+
+        {models.length && !customInput ? (
+          <div className="space-y-1.5">
+            {models.length > 6 || hasFreeModels ? (
+              <div className="flex items-center gap-2">
+                <Input
+                  value={searchQuery}
+                  placeholder="Filter models (e.g. llama, gemini, claude)..."
+                  className="h-7 text-xs bg-background/50"
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+                {hasFreeModels ? (
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant={onlyFree ? "secondary" : "outline"}
+                    className={cn("h-7 px-2 text-[11px] whitespace-nowrap", onlyFree && "border-primary/50 text-primary")}
+                    onClick={() => setOnlyFree(!onlyFree)}
+                  >
+                    ✨ Free only ({freeModels.length})
+                  </Button>
+                ) : null}
+              </div>
+            ) : null}
+            <Select value={value.model} onValueChange={(v) => onChange({ model: v })}>
+              <SelectTrigger className="bg-background/50">
+                <SelectValue placeholder="Pick a model" />
+              </SelectTrigger>
+              <SelectContent className="max-h-64">
+                {filteredModels.length ? (
+                  filteredModels.map((model) => (
+                    <SelectItem key={model} value={model}>
+                      <span className="flex items-center justify-between gap-2 w-full">
+                        <span className="truncate">{model}</span>
+                        {isFreeModel(model) ? (
+                          <span className="text-[10px] uppercase font-bold text-primary px-1 py-0.5 rounded bg-primary/10">
+                            Free
+                          </span>
+                        ) : null}
+                      </span>
+                    </SelectItem>
+                  ))
+                ) : (
+                  <div className="p-2 text-center text-xs text-muted-foreground">
+                    No models match your filter
+                  </div>
+                )}
+              </SelectContent>
+            </Select>
+            <div className="flex items-center justify-between text-[11px] text-muted-foreground">
+              <span className="truncate">Selected: {value.model || "None"}</span>
+              <span className="shrink-0">{filteredModels.length} of {models.length} model(s)</span>
+            </div>
+          </div>
         ) : (
           <Input
             value={value.model}
-            placeholder="Model name"
+            placeholder="e.g. openai/gpt-4o-mini, anthropic/claude-3.5-sonnet, or meta-llama/llama-3.3-70b-instruct:free"
             className="bg-background/50"
             onChange={(e) => onChange({ model: e.target.value })}
           />

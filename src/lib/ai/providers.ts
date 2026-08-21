@@ -26,6 +26,7 @@ import {
   questPrompt,
   recoveryPrompt,
 } from "./prompts";
+import { sanitizeContextForCloud } from "./personal-context-service";
 import {
   ProviderRequestError,
   ProviderUnavailableError,
@@ -414,5 +415,33 @@ export class PhoneLocalProvider extends OpenAiCompatibleProvider {
 export class OnlineApiProvider extends OpenAiCompatibleProvider {
   constructor(settings: AiProviderSettings, hooks: ProviderHooks = {}) {
     super("cloud", settings.provider ? `Online API · ${settings.provider}` : "Online API", settings, hooks, true);
+  }
+
+  override chat(messages: ChatMessage[], context: PersonalContext) {
+    return super.chat(messages, sanitizeContextForCloud(context));
+  }
+
+  override analyzeBehavior(context: PersonalContext) {
+    return super.analyzeBehavior(sanitizeContextForCloud(context));
+  }
+
+  override analyzeMissedQuest(input: MissAnalysisContext, context: PersonalContext) {
+    return super.analyzeMissedQuest(input, sanitizeContextForCloud(context));
+  }
+
+  override generateNextMove(context: PersonalContext) {
+    return super.generateNextMove(sanitizeContextForCloud(context));
+  }
+
+  override generateQuest(intent: string, context: PersonalContext) {
+    return super.generateQuest(intent, sanitizeContextForCloud(context));
+  }
+
+  override generateEvent(intent: string, context: PersonalContext) {
+    return super.generateEvent(intent, sanitizeContextForCloud(context));
+  }
+
+  override generateGoalPlan(rawInput: string, context: PersonalContext) {
+    return super.generateGoalPlan(rawInput, sanitizeContextForCloud(context));
   }
 }

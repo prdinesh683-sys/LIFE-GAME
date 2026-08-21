@@ -5,6 +5,7 @@ import type {
   Destination,
   Difficulty,
   EconomyConfig,
+  MinimumWin,
   NextMoveCategory,
   PersonalBlueprint,
   QuestRun,
@@ -31,6 +32,7 @@ export interface NextMoveOption {
   boostId: string | null;
   isRecovery: boolean;
   rush: boolean;
+  minimumWin?: MinimumWin | null;
   source: "engine" | "ai";
 }
 
@@ -114,6 +116,11 @@ export function generateNextMoves(input: RecommendationInput): NextMoveOption[] 
       boostId: boost?.id ?? null,
       isRecovery: options?.recovery ?? false,
       rush: options?.rush ?? false,
+      minimumWin: {
+        title: `5-minute micro: ${title}`,
+        durationMinutes: 5,
+        description: `Start smallest: just 5 minutes on ${title}.`,
+      },
       source: "engine",
     });
   };

@@ -203,8 +203,26 @@ function NextMovePage() {
               onClick={() => void accept(primary)}
             >
               <Zap className="size-5" />
-              Start now
+              Start now ({primary.durationMinutes}m)
             </Button>
+            {primary.minimumWin ? (
+              <Button
+                variant="outline"
+                size="sm"
+                className="mt-2 w-full border-primary/40 text-xs"
+                disabled={busy !== null || activeRun !== null}
+                onClick={() =>
+                  void accept({
+                    ...primary,
+                    title: primary.minimumWin!.title,
+                    durationMinutes: primary.minimumWin!.durationMinutes,
+                    reason: primary.minimumWin!.description,
+                  })
+                }
+              >
+                🌱 Low Energy / Can&apos;t start? Minimum Win: {primary.minimumWin.durationMinutes}m Micro
+              </Button>
+            ) : null}
             <Button
               variant="ghost"
               className="mt-2 w-full"

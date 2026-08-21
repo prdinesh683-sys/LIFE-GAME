@@ -250,6 +250,96 @@ export const memoryProposalSchema = z.object({
 });
 export type MemoryProposalResponse = z.infer<typeof memoryProposalSchema>;
 
+/** Role A: Situation Understanding schema */
+export const situationUnderstandingSchema = z.object({
+  type: z.literal("situation_understanding").default("situation_understanding"),
+  explicit_facts: z.array(z.string()).default([]),
+  uncertain_info: z.array(z.string()).default([]),
+  missing_critical_info: z.array(z.string()).default([]),
+  assumptions: z.array(z.string()).default([]),
+  clarifying_questions: z.array(z.string()).max(2).default([]),
+  ready_for_action: z.boolean().default(false),
+  ...meta,
+});
+export type SituationUnderstandingResponse = z.infer<typeof situationUnderstandingSchema>;
+
+/** Role B: Goal Clarification schema */
+export const goalClarificationSchema = z.object({
+  type: z.literal("goal_clarification").default("goal_clarification"),
+  goal: z.string(),
+  desired_outcome: z.string().default(""),
+  deadline: z.string().nullable().default(null),
+  scope: z.string().default(""),
+  constraints: z.array(z.string()).default([]),
+  success_condition: z.string().default(""),
+  current_state: z.string().default(""),
+  unknowns: z.array(z.string()).default([]),
+  clarifying_question: z.string().nullable().default(null),
+  ready_for_campaign: z.boolean().default(false),
+  ...meta,
+});
+export type GoalClarificationResponse = z.infer<typeof goalClarificationSchema>;
+
+/** Role D: Daily Context Interpretation schema */
+export const dailyInterpretationSchema = z.object({
+  type: z.literal("daily_interpretation").default("daily_interpretation"),
+  activity_summary: z.string(),
+  duration_minutes: z.number().min(0).default(0),
+  completed_work: z.array(z.string()).default([]),
+  remaining_work: z.array(z.string()).default([]),
+  constraints_noted: z.array(z.string()).default([]),
+  energy_estimate: z.number().min(1).max(5).default(3),
+  blockers: z.array(z.string()).default([]),
+  user_reported_outcome: z.enum(["completed", "partial", "missed", "blocked", "other"]).default("partial"),
+  uncertainty_notes: z.array(z.string()).default([]),
+  ...meta,
+});
+export type DailyInterpretationResponse = z.infer<typeof dailyInterpretationSchema>;
+
+/** Role G: Reflection & Adaptation schema */
+export const reflectionAdaptationSchema = z.object({
+  type: z.literal("reflection_adaptation").default("reflection_adaptation"),
+  plan_vs_actual: z.string(),
+  wrong_assumptions: z.array(z.string()).default([]),
+  recurring_blockers: z.array(z.string()).default([]),
+  useful_patterns: z.array(z.string()).default([]),
+  simplification_opportunities: z.array(z.string()).default([]),
+  proposed_changes: z
+    .array(
+      z.object({
+        target_type: z.enum(["destination", "chapter", "milestone", "quest", "blueprint", "routine"]),
+        target_id: z.string().nullable().default(null),
+        change_type: z.enum(["create", "update", "resize", "split", "archive", "replan"]),
+        summary: z.string(),
+        rationale: z.string(),
+        diff_payload: z.record(z.unknown()).default({}),
+      }),
+    )
+    .default([]),
+  ...meta,
+});
+export type ReflectionAdaptationResponse = z.infer<typeof reflectionAdaptationSchema>;
+
+/** Structured Change Proposal schema */
+export const changeProposalSchema = z.object({
+  type: z.literal("change_proposal").default("change_proposal"),
+  proposals: z
+    .array(
+      z.object({
+        target_type: z.enum(["destination", "chapter", "milestone", "quest", "blueprint", "routine"]),
+        target_id: z.string().nullable().default(null),
+        change_type: z.enum(["create", "update", "resize", "split", "archive", "replan"]),
+        summary: z.string(),
+        rationale: z.string(),
+        evidence_summary: z.string().default(""),
+        diff_payload: z.record(z.unknown()).default({}),
+      }),
+    )
+    .default([]),
+  ...meta,
+});
+export type ChangeProposalResponse = z.infer<typeof changeProposalSchema>;
+
 /** Pull the first JSON object out of a model reply, tolerating code fences. */
 export function extractJson(raw: string): unknown {
   const trimmed = raw.trim();
