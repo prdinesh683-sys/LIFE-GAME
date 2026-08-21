@@ -173,111 +173,95 @@ function NextMovePage() {
         </div>
 
         {primary ? (
-          <Panel glow className="space-y-4 border-primary/40 bg-surface-raised/90 p-5 shadow-xl">
-            <SectionTitle
-              action={<Pill tone="spark">{primary.rush ? "Rush" : primary.category}</Pill>}
-            >
-              Primary Recommendation
-            </SectionTitle>
-            <div className="space-y-1">
-              <h2 className="font-display text-2xl font-black tracking-tight text-foreground">{primary.title}</h2>
-              <p className="text-xs leading-relaxed text-muted-foreground">{primary.reason}</p>
+          <div className="rounded-2xl border border-primary/30 bg-surface/90 p-6 shadow-sm">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Pill tone="spark">{primary.durationMinutes} min</Pill>
+                <Pill tone="muted">{primary.difficulty}</Pill>
+                {primary.rush ? <Pill tone="accent">Countdown</Pill> : null}
+              </div>
+              <span className="text-xs font-semibold text-spark">+{primary.sparks} Sparks</span>
             </div>
-            <div className="flex flex-wrap gap-1.5 pt-1">
-              <Pill tone="spark">{primary.durationMinutes}m</Pill>
-              <Pill tone="spark">
-                <Sparkles className="size-3" />
-                {primary.sparks} Sparks
-              </Pill>
-              <Pill tone="accent">{ATTRIBUTE_LABELS[primary.attribute]}</Pill>
-              {primary.destinationTitle ? <Pill>{primary.destinationTitle}</Pill> : null}
-              {primary.rush ? (
-                <Pill tone="accent">
-                  <Timer className="size-3" />
-                  Countdown
-                </Pill>
+
+            <h2 className="mt-4 font-display text-2xl font-bold tracking-tight text-foreground">{primary.title}</h2>
+            <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">{primary.reason}</p>
+
+            <div className="mt-6 space-y-2.5">
+              <Button
+                size="lg"
+                className="w-full text-base font-semibold"
+                disabled={busy !== null || activeRun !== null}
+                onClick={() => void accept(primary)}
+              >
+                <Zap className="mr-1.5 size-5" />
+                Start this ({primary.durationMinutes}m)
+              </Button>
+
+              {primary.minimumWin ? (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="w-full text-xs text-muted-foreground hover:text-primary transition-colors"
+                  disabled={busy !== null || activeRun !== null}
+                  onClick={() =>
+                    void accept({
+                      ...primary,
+                      title: primary.minimumWin!.title,
+                      durationMinutes: primary.minimumWin!.durationMinutes,
+                      reason: primary.minimumWin!.description,
+                    })
+                  }
+                >
+                  🌱 Don't need to finish everything. Start with 5 minutes: {primary.minimumWin.title}
+                </Button>
               ) : null}
             </div>
-            <Button
-              size="lg"
-              className="w-full font-bold shadow-md hover:brightness-110"
-              disabled={busy !== null || activeRun !== null}
-              onClick={() => void accept(primary)}
-            >
-              <Zap className="size-5" />
-              Start this ({primary.durationMinutes}m)
-            </Button>
-            {primary.minimumWin ? (
-              <Button
-                variant="outline"
-                size="sm"
-                className="w-full border-primary/40 bg-primary/10 text-xs font-bold text-primary transition-all hover:bg-primary/20 hover:border-primary"
-                disabled={busy !== null || activeRun !== null}
-                onClick={() =>
-                  void accept({
-                    ...primary,
-                    title: primary.minimumWin!.title,
-                    durationMinutes: primary.minimumWin!.durationMinutes,
-                    reason: primary.minimumWin!.description,
-                  })
-                }
+
+            <div className="mt-3 flex justify-end border-t border-border/30 pt-3">
+              <button
+                type="button"
+                className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+                onClick={() => setSeed((s) => s + 1)}
+                disabled={busy !== null}
               >
-                ⚡ Start 5m Minimum Win: {primary.minimumWin.durationMinutes}m micro-action
-              </Button>
-            ) : null}
-            <Button
-              variant="ghost"
-              size="sm"
-              className="w-full text-xs text-muted-foreground hover:text-foreground"
-              onClick={() => setSeed((s) => s + 1)}
-              disabled={busy !== null}
-            >
-              <RefreshCw className="size-3.5 mr-1" />
-              Show something else
-            </Button>
-          </Panel>
+                <RefreshCw className="size-3" />
+                Show something else
+              </button>
+            </div>
+          </div>
         ) : (
-          <Panel>
-            <p className="text-sm text-muted-foreground">
-              Set your current state above and options will appear instantly.
-            </p>
-          </Panel>
+          <EmptyState
+            title="Set your state above"
+            body="Select your energy and available time to see your next move instantly."
+          />
         )}
 
         {alternatives.length ? (
-          <div>
-            <SectionTitle>Other Available Next Moves</SectionTitle>
-            <div className="space-y-3">
-              {alternatives.map((option) => (
-                <Panel key={option.id} className="space-y-3 border-border/70 bg-surface/80 p-4 transition-colors hover:border-border">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0 flex-1 space-y-1">
-                      <h3 className="font-display text-base font-bold leading-snug text-foreground">
-                        {option.title}
-                      </h3>
-                      <p className="text-xs text-muted-foreground">{option.reason}</p>
-                    </div>
-                    <span className="numeric shrink-0 text-sm font-bold text-spark">
-                      +{option.sparks} ✨
-                    </span>
+          <div className="pt-2">
+            <SectionTitle>Alternative Options</SectionTitle>
+            <div className="space-y-2.5">
+              {alternatives.slice(0, 3).map((option) => (
+                <div
+                  key={option.id}
+                  className="flex items-center justify-between gap-3 rounded-xl border border-border/50 bg-surface/40 p-4 transition-colors hover:border-border"
+                >
+                  <div className="min-w-0 flex-1">
+                    <p className="font-display text-sm font-semibold text-foreground">{option.title}</p>
+                    <p className="mt-0.5 text-xs text-muted-foreground line-clamp-1">{option.reason}</p>
                   </div>
-                  <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border/40 pt-2">
-                    <div className="flex items-center gap-1.5">
-                      <Pill tone="spark">{option.durationMinutes}m</Pill>
-                      <Pill tone="muted">{ATTRIBUTE_LABELS[option.attribute]}</Pill>
-                      {option.isRecovery ? <Pill tone="focus">Recovery 🛟</Pill> : null}
-                    </div>
+                  <div className="flex shrink-0 items-center gap-2">
+                    <span className="text-xs text-muted-foreground">{option.durationMinutes}m</span>
                     <Button
                       variant="secondary"
                       size="sm"
-                      className="text-xs font-semibold"
+                      className="text-xs"
                       disabled={busy !== null || activeRun !== null}
                       onClick={() => void accept(option)}
                     >
-                      Start this
+                      Start
                     </Button>
                   </div>
-                </Panel>
+                </div>
               ))}
             </div>
           </div>

@@ -134,15 +134,15 @@ function MemoryPage() {
   };
 
   return (
-    <AppShell title="Memory 🧠" subtitle="What the game remembers, and why">
-      <div className="space-y-4">
-        <Panel glow className="border-accent/40 bg-surface-raised/90 p-5 shadow-lg">
-          <SectionTitle>Follow-Through Rhythms</SectionTitle>
+    <AppShell title="Memory" subtitle="What matters about your journey">
+      <div className="space-y-6">
+        <div className="rounded-2xl border border-border/50 bg-gradient-to-b from-surface-raised/60 to-surface/40 p-5">
+          <SectionTitle>Follow-Through Patterns</SectionTitle>
           {followThrough.hasEvidence ? (
-            <ul className="mt-1.5 space-y-1.5 text-xs text-foreground">
+            <ul className="mt-2 space-y-1.5 text-xs text-foreground">
               {followThrough.slots.map((slot) => (
                 <li key={slot.slot} className="flex items-center gap-2">
-                  <span className="text-accent">▸</span>
+                  <span className="text-primary">•</span>
                   <span>{slot.label}</span>
                 </li>
               ))}
@@ -150,26 +150,21 @@ function MemoryPage() {
           ) : (
             <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{followThrough.headline}</p>
           )}
-        </Panel>
+        </div>
 
-        <Panel className="space-y-3.5 border-border/80 bg-surface/80 p-5">
-          <SectionTitle>Memory Health & Optimization</SectionTitle>
+        <div className="space-y-3">
+          <SectionTitle>Memory Health</SectionTitle>
           <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
-            <StatTile label="Active" value={health.active} />
+            <StatTile label="Active Memories" value={health.active} />
             <StatTile label="Patterns" value={health.patterns} />
-            <StatTile label="Integrity" value={`${health.score}`} hint={health.band} tone="momentum" />
+            <StatTile label="Health Score" value={`${health.score}`} hint={health.band} tone="momentum" />
             <StatTile label="Duplicates" value={health.duplicateGroups} />
           </div>
-          <ul className="mt-3 space-y-1 text-xs text-muted-foreground">
-            {health.notes.map((note) => (
-              <li key={note}>• {note}</li>
-            ))}
-          </ul>
-          <div className="mt-3.5 flex flex-wrap gap-2">
+          <div className="mt-3 flex flex-wrap gap-2">
             <Button
               size="sm"
               variant="outline"
-              className="text-xs font-semibold"
+              className="text-xs"
               disabled={busy}
               onClick={() => void run("Patterns updated", ai.refreshPatterns)}
             >
@@ -178,26 +173,23 @@ function MemoryPage() {
             <Button
               size="sm"
               variant="outline"
-              className="text-xs font-semibold"
+              className="text-xs"
               disabled={busy}
               onClick={() => void run("Duplicate groups merged", ai.consolidateDuplicates)}
             >
               <Layers className="mr-1.5 size-3.5 text-accent" /> Consolidate duplicates
             </Button>
           </div>
-        </Panel>
+        </div>
 
         {ai.memoryProposals.length ? (
-          <Panel glow className="space-y-3.5 border-primary/40 bg-surface-raised/90 p-5 shadow-xl">
-            <SectionTitle>Suggested by AI — Waiting for Approval</SectionTitle>
-            <p className="text-xs leading-relaxed text-muted-foreground">
-              The AI proposes observations from recent sessions. Nothing is committed until you confirm it.
-            </p>
-            <ul className="mt-3 space-y-2.5">
+          <div className="space-y-3">
+            <SectionTitle>Suggested by Brain — Waiting for Approval</SectionTitle>
+            <div className="space-y-2.5">
               {ai.memoryProposals.map((proposal) => (
-                <li key={proposal.id} className="rounded-lg border border-border/70 bg-background/50 p-3.5">
-                  <p className="font-display text-sm font-bold text-foreground">{proposal.title}</p>
-                  <ul className="mt-2 space-y-1.5 text-xs text-muted-foreground">
+                <div key={proposal.id} className="rounded-2xl border border-primary/30 bg-surface/80 p-5 shadow-sm">
+                  <p className="font-display text-sm font-semibold text-foreground">{proposal.title}</p>
+                  <ul className="mt-2.5 space-y-1.5 text-xs text-muted-foreground">
                     {((proposal.payload as { drafts?: { kind: string; text: string }[] }).drafts ?? []).map(
                       (draft, index) => (
                         <li key={`${proposal.id}-${index}`} className="flex items-center gap-2">
@@ -207,10 +199,10 @@ function MemoryPage() {
                       ),
                     )}
                   </ul>
-                  <div className="mt-3 flex flex-wrap gap-2">
+                  <div className="mt-4 flex gap-2">
                     <Button
                       size="sm"
-                      className="font-bold text-xs"
+                      className="text-xs font-semibold"
                       disabled={busy}
                       onClick={() => void run("Remembered", () => ai.decideProposal(proposal.id, "approved"))}
                     >
@@ -223,13 +215,13 @@ function MemoryPage() {
                       disabled={busy}
                       onClick={() => void run("Dismissed", () => ai.decideProposal(proposal.id, "rejected"))}
                     >
-                      Not accurate
+                      Dismiss
                     </Button>
                   </div>
-                </li>
+                </div>
               ))}
-            </ul>
-          </Panel>
+            </div>
+          </div>
         ) : null}
 
         <div className="flex flex-wrap gap-2">

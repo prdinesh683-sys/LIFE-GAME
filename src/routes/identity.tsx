@@ -35,85 +35,84 @@ function IdentityPage() {
   );
 
   return (
-    <AppShell title="Identity 🧬" subtitle={profile.title}>
-      <div className="space-y-4">
-        <Panel glow className="border-primary/40 bg-gradient-to-br from-surface-raised/90 via-surface to-background p-5 shadow-xl">
+    <AppShell title="Identity" subtitle="Who am I becoming?">
+      <div className="space-y-6">
+        <div className="rounded-2xl border border-border/50 bg-gradient-to-b from-surface-raised/60 to-surface/40 p-6">
           <div className="flex items-start justify-between gap-3">
-            <div className="space-y-1">
-              <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-primary">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wider text-primary">
                 {profile.chapter}
               </p>
-              <h2 className="font-display text-3xl font-black text-foreground">{profile.displayName}</h2>
+              <h2 className="mt-1 font-display text-2xl font-bold tracking-tight text-foreground">{profile.displayName}</h2>
+              <p className="mt-0.5 text-xs text-muted-foreground">Rank {profile.rank} · {profile.title}</p>
             </div>
-            <Pill tone="primary">Rank {profile.rank}</Pill>
+            <div className="text-right">
+              <span className="numeric text-lg font-bold text-spark">{profile.lifetimeSparks}</span>
+              <p className="text-[11px] text-muted-foreground">lifetime Sparks</p>
+            </div>
           </div>
-          <div className="mt-4 flex flex-wrap gap-2">
-            <Pill tone="spark">{profile.lifetimeSparks} lifetime Sparks ✨</Pill>
-            <Pill tone="accent">{momentum.label}</Pill>
-          </div>
-          <div className="mt-4">
+          <div className="mt-5">
             <ProgressRail
               ratio={rank.ratio}
-              label={`${rank.intoRank}/${rank.needed} Sparks to next Rank`}
-              tone="momentum"
+              label={`${rank.intoRank}/${rank.needed} Sparks to next rank`}
             />
           </div>
-        </Panel>
+        </div>
 
         <div className="grid grid-cols-3 gap-2.5">
           <StatTile label="Current Run" value={`${profile.currentRun}d`} tone="run" />
           <StatTile label="Personal Best" value={`${profile.bestRun}d`} />
-          <StatTile label="Combo Multiplier" value={`x${profile.combo || 1}`} tone="spark" />
+          <StatTile label="Multiplier" value={`x${profile.combo || 1}`} tone="spark" />
         </div>
 
-        <div>
-          <SectionTitle>Core Attributes & Energy Pillars</SectionTitle>
-          <Panel className="space-y-3.5 border-border/80 bg-surface/80 p-5">
+        <div className="space-y-3">
+          <SectionTitle>Core Attributes</SectionTitle>
+          <div className="rounded-2xl border border-border/50 bg-surface/50 p-5 space-y-3.5">
             {ATTRIBUTE_KEYS.map((key) => {
               const points = attributeLabelPoints(snapshot, key);
               return (
-                <div key={key} className="space-y-1.5">
+                <div key={key} className="space-y-1">
                   <div className="flex items-center justify-between text-xs">
-                    <span className="font-bold text-foreground">{ATTRIBUTE_LABELS[key]}</span>
-                    <span className="numeric font-bold text-accent">{points} pts</span>
+                    <span className="font-medium text-foreground">{ATTRIBUTE_LABELS[key]}</span>
+                    <span className="numeric text-muted-foreground">{points} pts</span>
                   </div>
-                  <ProgressRail ratio={points / maxPoints} tone="momentum" />
+                  <ProgressRail ratio={points / maxPoints} />
                 </div>
               );
             })}
-          </Panel>
+          </div>
         </div>
 
-        <div>
-          <SectionTitle>Trophies & Milestones 🏆</SectionTitle>
+        <div className="space-y-3">
+          <SectionTitle>Milestones & Trophies</SectionTitle>
           {trophies.length ? (
             <div className="grid grid-cols-2 gap-2.5">
               {trophies.map((trophy) => (
-                <Panel key={trophy.id} className="border-border/70 bg-surface/80 p-4 transition-colors hover:border-primary/40">
-                  <p className="text-2xl">{trophy.icon}</p>
-                  <p className="mt-2 font-display text-sm font-bold text-foreground">{trophy.name}</p>
+                <div key={trophy.id} className="rounded-xl border border-border/40 bg-surface/40 p-4 transition-colors">
+                  <p className="text-xl">{trophy.icon}</p>
+                  <p className="mt-1.5 font-display text-sm font-semibold text-foreground">{trophy.name}</p>
                   <p className="mt-0.5 text-xs text-muted-foreground">{trophy.description}</p>
-                </Panel>
+                </div>
               ))}
             </div>
           ) : (
             <EmptyState
-              title="No trophies unlocked yet"
-              body="Trophies unlock from real actions—first quest completion, maintaining your Run streak, and ranking up."
+              title="No milestones unlocked yet"
+              body="Milestones unlock naturally as you complete real quests and maintain your momentum."
             />
           )}
         </div>
 
         {blueprint ? (
-          <div>
-            <SectionTitle>Active Campaign Blueprint</SectionTitle>
-            <Panel className="space-y-3.5 border-border/80 bg-surface/80 p-5">
-              <p className="font-display text-base font-bold leading-snug text-foreground">{blueprint.direction}</p>
+          <div className="space-y-3">
+            <SectionTitle>Life Blueprint</SectionTitle>
+            <div className="rounded-2xl border border-border/50 bg-surface/50 p-5 space-y-3.5">
+              <p className="font-display text-sm font-semibold text-foreground leading-relaxed">{blueprint.direction}</p>
               <BlueprintList label="Goals" items={blueprint.goals} />
               <BlueprintList label="Priorities" items={blueprint.priorities} />
               <BlueprintList label="Anti-goals" items={blueprint.antiGoals} />
               <BlueprintList label="Constraints" items={blueprint.constraints} />
-            </Panel>
+            </div>
           </div>
         ) : null}
       </div>

@@ -92,18 +92,18 @@ function QuestsPage() {
   };
 
   return (
-    <AppShell title="Quests ⚔️" subtitle={`${available.length} ready to run`}>
+    <AppShell title="Journey" subtitle={`${available.length} active quests`}>
       <Tabs defaultValue="available">
-        <TabsList className="w-full">
-          <TabsTrigger value="available" className="flex-1">
-            Ready
+        <TabsList className="w-full bg-surface/60 border border-border/40 p-1">
+          <TabsTrigger value="available" className="flex-1 text-xs">
+            Active Missions ({available.length})
           </TabsTrigger>
-          <TabsTrigger value="history" className="flex-1">
+          <TabsTrigger value="history" className="flex-1 text-xs">
             History
           </TabsTrigger>
-          <TabsTrigger value="new" className="flex-1">
-            <Plus className="size-4" />
-            New
+          <TabsTrigger value="new" className="flex-1 text-xs">
+            <Plus className="mr-1 size-3.5" />
+            New Quest
           </TabsTrigger>
         </TabsList>
 

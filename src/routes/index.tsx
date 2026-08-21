@@ -201,107 +201,81 @@ function TodayPage() {
   };
 
   return (
-    <AppShell title="Today" subtitle={`Rank ${profile.rank} · ${profile.title}`}>
-      <div className="space-y-4">
-        {/* ---- Horizon HUD: Chapter & Progression ---- */}
-        <Panel glow className="relative overflow-hidden border-primary/30 bg-gradient-to-br from-surface-raised/90 via-surface to-background p-5">
-          <div className="flex items-start justify-between gap-4">
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <span className="h-2 w-2 animate-pulse rounded-full bg-primary" />
-                <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-primary">
-                  {profile.chapter}
+    <AppShell title="Home" subtitle={`Rank ${profile.rank} · ${profile.title}`}>
+      <div className="space-y-6">
+        {/* ---- 1. YOUR CURRENT JOURNEY & CHAPTER ---- */}
+        <div className="space-y-2">
+          <div className="flex items-center justify-between text-xs text-muted-foreground">
+            <span className="font-semibold uppercase tracking-wider text-primary">Your Journey</span>
+            <span>Rank {profile.rank} · {profile.title}</span>
+          </div>
+          <div className="rounded-2xl border border-border/50 bg-gradient-to-b from-surface-raised/60 to-surface/40 p-5">
+            <div className="flex items-baseline justify-between gap-4">
+              <div>
+                <p className="text-xs font-medium text-muted-foreground">CURRENT CHAPTER</p>
+                <h2 className="mt-1 font-display text-xl font-bold tracking-tight text-foreground">{profile.chapter}</h2>
+              </div>
+              <div className="text-right">
+                <p className="numeric text-2xl font-bold text-spark">
+                  {profile.sparks} <span className="text-xs font-normal text-muted-foreground">Sparks</span>
                 </p>
               </div>
-              <p className="numeric flex items-baseline gap-2 text-4xl font-black text-spark">
-                <Sparkles className="size-6 text-spark" />
-                {profile.sparks}
-                <span className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">Sparks</span>
-              </p>
             </div>
-            <div className="text-right">
-              <Pill tone="primary">Rank {profile.rank} · {profile.title}</Pill>
-              <p className="numeric mt-2 text-xs font-semibold text-muted-foreground">
-                {rank.intoRank}/{rank.needed} to Rank {profile.rank + 1}
-              </p>
+            <div className="mt-4">
+              <ProgressRail ratio={rank.ratio} label={`${rank.intoRank}/${rank.needed} Sparks to next rank`} />
             </div>
           </div>
-          <div className="mt-4">
-            <ProgressRail ratio={rank.ratio} tone="momentum" />
+        </div>
+
+        {/* ---- 2. WHAT'S YOUR NEXT MOVE? (Dominant Stage) ---- */}
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <h2 className="font-display text-lg font-bold text-foreground">What's your next move?</h2>
+            <Link to="/next-move" className="text-xs text-primary hover:underline">
+              All options →
+            </Link>
           </div>
-        </Panel>
 
-        {/* ---- Telemetry Tiles: Momentum, Run & Volume ---- */}
-        <div className="grid grid-cols-3 gap-2.5">
-          <StatTile
-            label="Momentum"
-            value={Math.round(momentum.value)}
-            hint={momentum.label}
-            tone="momentum"
-          />
-          <StatTile
-            label="Run Streak"
-            value={`${profile.currentRun}d`}
-            hint={`Best ${profile.bestRun}d`}
-            tone="run"
-          />
-          <StatTile label="Today" value={completedToday} hint="completed" tone="focus" />
-        </div>
-
-        <div>
-          <SectionTitle>Biometric & Capacity Context</SectionTitle>
-          <CurrentStateBar />
-        </div>
-
-        {/* ---- The One Decision: Dominant Hero Stage ---- */}
-        <div className="pt-1">
-          <SectionTitle>Right Now · Core Decision</SectionTitle>
           {activeRun ? (
             <ActiveRunPanel />
           ) : scheduled ? (
-            <Panel glow className="space-y-3.5 border-primary/40 bg-surface-raised/90 p-5 shadow-lg">
-              <div className="flex flex-wrap items-center gap-2">
+            <div className="rounded-2xl border border-primary/30 bg-surface/90 p-6 shadow-sm">
+              <div className="flex items-center gap-2">
                 <Pill tone={scheduled.relevance === "now" ? "primary" : "muted"}>
                   {scheduled.quest.timeWindow
                     ? TIME_WINDOW_LABELS[scheduled.quest.timeWindow]
                     : relevanceLabel(scheduled.relevance)}
                 </Pill>
-                <Pill tone="spark">{scheduled.quest.durationMinutes} min</Pill>
-                {needsRecovery ? <Pill tone="focus">recovery-friendly</Pill> : null}
+                <span className="text-xs text-muted-foreground">{scheduled.quest.durationMinutes} min</span>
               </div>
-              <div className="space-y-1">
-                <p className="font-display text-xl font-bold tracking-tight text-foreground">{scheduled.quest.name}</p>
-                <p className="text-xs leading-relaxed text-muted-foreground">
-                  {scheduled.relevance === "now"
-                    ? "This is the window you picked for this quest."
-                    : "The scheduled window has passed, but completing it now still counts fully."}
-                </p>
+              <h3 className="mt-3 font-display text-2xl font-bold tracking-tight text-foreground">{scheduled.quest.name}</h3>
+              <p className="mt-1.5 text-xs text-muted-foreground leading-relaxed">
+                {scheduled.relevance === "now"
+                  ? "This is the window you picked for this quest."
+                  : "The scheduled window has passed, but completing it now still counts fully."}
+              </p>
+              <div className="mt-5 space-y-2">
+                <Button
+                  size="lg"
+                  className="w-full text-base font-semibold"
+                  disabled={busy !== null}
+                  onClick={async () => {
+                    setBusy(scheduled.quest.id);
+                    try {
+                      await startQuest(scheduled.quest.id);
+                      toast.success("Quest started. Put the device away.");
+                    } catch (e) {
+                      toast.error(e instanceof Error ? e.message : "Could not start that quest");
+                    } finally {
+                      setBusy(null);
+                    }
+                  }}
+                >
+                  <Zap className="mr-1.5 size-5" />
+                  Start ({scheduled.quest.durationMinutes}m)
+                </Button>
               </div>
-              <Button
-                size="lg"
-                className="w-full font-bold shadow-md hover:brightness-110"
-                disabled={busy !== null}
-                onClick={async () => {
-                  setBusy(scheduled.quest.id);
-                  try {
-                    await startQuest(scheduled.quest.id);
-                    toast.success("Quest started. Put the device away.");
-                  } catch (e) {
-                    toast.error(e instanceof Error ? e.message : "Could not start that quest");
-                  } finally {
-                    setBusy(null);
-                  }
-                }}
-              >
-                <Zap className="size-5" />
-                Start this ({scheduled.quest.durationMinutes}m)
-              </Button>
-              <Button asChild variant="ghost" size="sm" className="w-full text-xs text-muted-foreground hover:text-foreground">
-                <Link to="/next-move">
-                  More options
-                </Link>
-              </Button>
-            </Panel>
+            </div>
           ) : topAdvice ? (
             <AdvisorCard
               record={topAdvice}
@@ -317,89 +291,106 @@ function TodayPage() {
               }
             />
           ) : coldStart && !primary ? (
-            <Panel glow className="space-y-3.5 border-primary/40 bg-surface-raised/90 p-5 shadow-lg">
-              <div className="space-y-1">
-                <p className="font-display text-xl font-bold text-foreground">{starter.title}</p>
-                <p className="text-xs leading-relaxed text-muted-foreground">{starter.why}</p>
-              </div>
+            <div className="rounded-2xl border border-primary/30 bg-surface/90 p-6">
+              <h3 className="font-display text-xl font-bold text-foreground">{starter.title}</h3>
+              <p className="mt-1 text-xs text-muted-foreground leading-relaxed">{starter.why}</p>
               <Button
                 size="lg"
-                className="w-full font-bold shadow-md hover:brightness-110"
+                className="mt-5 w-full font-semibold"
                 disabled={busy !== null}
                 onClick={() => void startStarter()}
               >
-                <Zap className="size-5" />
+                <Zap className="mr-1.5 size-5" />
                 Start this
               </Button>
-            </Panel>
+            </div>
           ) : primary ? (
-            <Panel glow className="space-y-4 border-primary/40 bg-surface-raised/90 p-5 shadow-lg">
-              <div className="space-y-1.5">
-                <div className="flex items-center justify-between gap-2">
-                  <span className="text-[11px] font-bold uppercase tracking-[0.16em] text-primary">Priority Next Move</span>
-                  <div className="flex flex-wrap items-center gap-1.5">
-                    <Pill tone="spark">
-                      <Timer className="mr-1 inline size-3" />
-                      {primary.durationMinutes}m
-                    </Pill>
-                    <Pill tone="muted">{primary.difficulty}</Pill>
-                    {needsRecovery ? <Pill tone="focus">recovery</Pill> : null}
-                  </div>
-                </div>
-                <p className="font-display text-xl font-black tracking-tight text-foreground">{primary.title}</p>
-                <p className="text-xs leading-relaxed text-muted-foreground">{primary.reason}</p>
+            <div className="rounded-2xl border border-primary/30 bg-surface/90 p-6 shadow-sm">
+              <div className="flex items-center gap-2">
+                <Pill tone="spark">{primary.durationMinutes} min</Pill>
+                <Pill tone="muted">{primary.difficulty}</Pill>
+                {needsRecovery ? <Pill tone="focus">recovery-friendly</Pill> : null}
               </div>
+              <h3 className="mt-3 font-display text-2xl font-bold tracking-tight text-foreground">{primary.title}</h3>
+              <p className="mt-1.5 text-xs text-muted-foreground leading-relaxed">{primary.reason}</p>
               
-              <Button
-                size="lg"
-                className="w-full font-bold tracking-wide shadow-md hover:brightness-110"
-                disabled={busy !== null}
-                onClick={() => void startOption(primary)}
-              >
-                <Zap className="size-5" />
-                Start this ({primary.durationMinutes}m)
-              </Button>
-
-              {primary.minimumWin && (needsRecovery || (daily && (daily.energy <= 2 || daily.availableMinutes <= 15))) ? (
+              <div className="mt-5 space-y-2">
                 <Button
-                  variant="outline"
-                  size="sm"
-                  className="w-full border-primary/40 bg-primary/10 text-xs font-bold text-primary transition-all hover:bg-primary/20 hover:border-primary"
+                  size="lg"
+                  className="w-full text-base font-semibold"
                   disabled={busy !== null}
-                  onClick={() =>
-                    void startOption({
-                      ...primary,
-                      title: primary.minimumWin!.title,
-                      durationMinutes: primary.minimumWin!.durationMinutes,
-                      reason: primary.minimumWin!.description,
-                    })
-                  }
+                  onClick={() => void startOption(primary)}
                 >
-                  ⚡ Start 5m Minimum Win: {primary.minimumWin.durationMinutes}m micro-action
+                  <Zap className="mr-1.5 size-5" />
+                  Start ({primary.durationMinutes}m)
                 </Button>
-              ) : null}
 
-              <div className="flex gap-2 pt-1">
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  className="flex-1 font-medium text-xs text-muted-foreground hover:text-foreground"
+                {primary.minimumWin ? (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="w-full text-xs text-muted-foreground hover:text-primary transition-colors"
+                    disabled={busy !== null}
+                    onClick={() =>
+                      void startOption({
+                        ...primary,
+                        title: primary.minimumWin!.title,
+                        durationMinutes: primary.minimumWin!.durationMinutes,
+                        reason: primary.minimumWin!.description,
+                      })
+                    }
+                  >
+                    🌱 Low energy? Start with 5 minutes: {primary.minimumWin.title}
+                  </Button>
+                ) : null}
+              </div>
+
+              <div className="mt-3 flex justify-between border-t border-border/30 pt-3">
+                <button
+                  type="button"
+                  className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
                   onClick={() => setSeed((s) => s + 1)}
                 >
-                  <RefreshCw className="mr-1 size-3.5" />
-                  Show alternative
-                </Button>
-                <Button asChild variant="ghost" size="sm" className="flex-1 font-medium text-xs text-muted-foreground hover:text-foreground">
-                  <Link to="/next-move">All options</Link>
-                </Button>
+                  <RefreshCw className="size-3" />
+                  Show something else
+                </button>
+                <Link to="/next-move" className="text-xs text-muted-foreground hover:text-foreground">
+                  See 3 alternatives →
+                </Link>
               </div>
-            </Panel>
+            </div>
           ) : (
             <EmptyState
               title="Nothing ready to start"
               body="Tell me how today feels above or select a starter from Next Move."
             />
           )}
+        </div>
+
+        {/* ---- 3. TODAY'S CONTEXT (Energy & Available Time) ---- */}
+        <div>
+          <SectionTitle>Today's Context</SectionTitle>
+          <CurrentStateBar />
+        </div>
+
+        {/* ---- 4. PROGRESS TELEMETRY ---- */}
+        <div>
+          <SectionTitle>Progress</SectionTitle>
+          <div className="grid grid-cols-3 gap-2.5">
+            <StatTile
+              label="Momentum"
+              value={Math.round(momentum.value)}
+              hint={momentum.label}
+              tone="momentum"
+            />
+            <StatTile
+              label="Run Streak"
+              value={`${profile.currentRun}d`}
+              hint={`Best ${profile.bestRun}d`}
+              tone="run"
+            />
+            <StatTile label="Completed" value={completedToday} hint="today" tone="focus" />
+          </div>
         </div>
 
         <OutcomeSummary />

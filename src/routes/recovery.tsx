@@ -66,39 +66,33 @@ function RecoveryPage() {
   if (!snapshot) return <AppShell title="Recovery">{null}</AppShell>;
 
   return (
-    <AppShell title="Recovery 🛟" subtitle="Comeback, not catch-up">
-      <div className="space-y-4">
-        <Panel glow className="border-focus/40 bg-gradient-to-br from-surface-raised/90 via-surface to-background p-5 shadow-lg">
-          <div className="flex items-center justify-between gap-2">
+    <AppShell title="Recovery" subtitle="Welcome back">
+      <div className="space-y-6">
+        <div className="rounded-2xl border border-border/50 bg-gradient-to-b from-surface-raised/60 to-surface/40 p-6">
+          <div className="flex items-center gap-2">
             <Pill tone={needsRecovery ? "primary" : "focus"}>
-              {needsRecovery ? "Momentum in Reset Window" : "Momentum Holding Steady"}
+              {needsRecovery ? "Momentum in Reset Window" : "Momentum Steady"}
             </Pill>
-            <span className="text-xs font-semibold text-focus">Zero Debt Sanctuary</span>
           </div>
-          <h2 className="mt-3 font-display text-2xl font-black leading-snug text-foreground">
-            Nothing to make up for.
+          <h2 className="mt-3 font-display text-2xl font-bold tracking-tight text-foreground">
+            Welcome back.
           </h2>
-          <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">
-            There is no penalty or debt in this game. One small real action restarts your Momentum and restores your grace period immediately.
+          <p className="mt-1 text-sm text-muted-foreground leading-relaxed">
+            Life moved. That's completely okay. There is no debt or penalty here — one small action restarts your momentum immediately.
           </p>
-        </Panel>
+        </div>
 
         {option ? (
-          <Panel glow className="space-y-4 border-primary/40 bg-surface-raised/90 p-5 shadow-xl">
-            <div className="flex items-center justify-between gap-2">
-              <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-primary">Smallest Useful Action</span>
-              <div className="flex items-center gap-1.5">
-                <Pill tone="spark">{option.durationMinutes}m</Pill>
-                <Pill tone="spark">+{option.sparks} ✨</Pill>
-              </div>
+          <div className="rounded-2xl border border-primary/30 bg-surface/90 p-6 shadow-sm">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold uppercase tracking-wider text-primary">Let's take one small step</span>
+              <span className="text-xs text-muted-foreground">{option.durationMinutes} min</span>
             </div>
-            <div className="space-y-1">
-              <p className="font-display text-xl font-black text-foreground">{option.title}</p>
-              <p className="text-xs leading-relaxed text-muted-foreground">{option.reason}</p>
-            </div>
+            <h3 className="mt-3 font-display text-xl font-bold tracking-tight text-foreground">{option.title}</h3>
+            <p className="mt-1 text-xs text-muted-foreground leading-relaxed">{option.reason}</p>
             <Button
               size="lg"
-              className="w-full font-bold shadow-md hover:brightness-110"
+              className="mt-5 w-full text-base font-semibold"
               disabled={busy}
               onClick={async () => {
                 setBusy(true);
@@ -114,12 +108,12 @@ function RecoveryPage() {
                 }
               }}
             >
-              Start the comeback ({option.durationMinutes}m)
+              Start comeback ({option.durationMinutes}m)
             </Button>
-          </Panel>
+          </div>
         ) : null}
 
-        <Panel className="space-y-3.5 border-border/80 bg-surface/80 p-5">
+        <div className="space-y-3">
           <SectionTitle
             action={
               analysis ? (
@@ -129,7 +123,7 @@ function RecoveryPage() {
               ) : null
             }
           >
-            Behavioral Read & Intelligence
+            Reflective Insights
           </SectionTitle>
           {analysis ? (
             <div className="space-y-3.5 text-sm">
@@ -176,7 +170,7 @@ function RecoveryPage() {
             <Brain className="mr-1.5 size-3.5" />
             {ai.thinking ? "Analyzing behavior…" : "Ask for a behavioral read"}
           </Button>
-        </Panel>
+        </div>
 
         <Panel>
           <SectionTitle>Why you missed things</SectionTitle>

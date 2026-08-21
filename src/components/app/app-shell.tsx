@@ -31,23 +31,21 @@ interface NavItem {
  * depth, reachable from "More" — never competing for the same decision.
  */
 const PRIMARY_NAV: NavItem[] = [
-  { to: "/", label: "Today", icon: Home },
-  { to: "/quests", label: "Quests", icon: Swords },
-  { to: "/chat", label: "Chat", icon: MessageSquare },
-  { to: "/settings", label: "Settings", icon: Settings2 },
+  { to: "/", label: "Home", icon: Home },
+  { to: "/next-move", label: "Next Move", icon: Zap },
+  { to: "/quests", label: "Journey", icon: Compass },
+  { to: "/chat", label: "Brain", icon: Brain },
 ];
 
 const MORE_NAV: NavItem[] = [
-  { to: "/next-move", label: "More next moves", icon: Zap },
-  { to: "/advisor", label: "Advice history", icon: Compass },
-  { to: "/agent", label: "Plans", icon: Bot },
-  { to: "/memory", label: "What I remember", icon: Brain },
-  { to: "/identity", label: "Identity", icon: User },
-  { to: "/boosts", label: "Boosts", icon: Compass },
-  { to: "/drains", label: "Drains", icon: LifeBuoy },
-  { to: "/recovery", label: "Recovery", icon: LifeBuoy },
+  { to: "/recovery", label: "Recovery · Return Point", icon: LifeBuoy },
+  { to: "/identity", label: "Identity & Growth", icon: User },
+  { to: "/memory", label: "Memory & Insights", icon: Brain },
+  { to: "/advisor", label: "Advisor History", icon: Swords },
+  { to: "/agent", label: "Campaign Plans", icon: Bot },
+  { to: "/boosts", label: "Boosts & Drains", icon: Compass },
+  { to: "/settings", label: "Settings", icon: Settings2 },
 ];
-
 
 export function AppShell({
   title,
@@ -60,54 +58,54 @@ export function AppShell({
   children: ReactNode;
   hideNav?: boolean;
 }) {
-  const { ready, error, snapshot } = useGame();
+  const { ready, error } = useGame();
   const navigate = useNavigate();
-  const pathname = useRouterState({ select: (s) => s.location.pathname });
-
-  const onboardingComplete = snapshot?.settings.onboardingComplete ?? false;
+  const currentPath = useRouterState({ select: (s) => s.location.pathname });
 
   useEffect(() => {
-    if (ready && snapshot && !onboardingComplete && pathname !== "/onboarding") {
-      void navigate({ to: "/onboarding" });
+    if (!ready) return;
+    if (currentPath === "/onboarding") return;
+    try {
+      if (localStorage.getItem("lifegame_onboarded") !== "true") {
+        void navigate({ to: "/onboarding" });
+      }
+    } catch {
+      /* localStorage blocked; stay on current route */
     }
-  }, [ready, snapshot, onboardingComplete, pathname, navigate]);
-
-  const theme = snapshot?.settings.theme ?? "dark";
-  const reduced = snapshot?.settings.reducedMotion ?? false;
+  }, [ready, currentPath, navigate]);
 
   return (
     <div
       className={cn(
-        "relative min-h-screen bg-background text-foreground",
-        theme === "light" && "theme-light",
-        reduced && "reduce-motion",
+        "relative min-h-screen bg-background text-foreground selection:bg-primary/25 selection:text-foreground",
       )}
     >
       <div className="pointer-events-none absolute inset-0 grid-backdrop" aria-hidden />
 
-      <header className="sticky top-0 z-30 border-b border-border/80 bg-background/80 backdrop-blur-md">
-        <div className="mx-auto flex w-full max-w-3xl items-center gap-3 px-4 py-3.5">
-          <div className="min-w-0 flex-1">
-            <h1 className="truncate font-display text-lg font-bold tracking-wide text-foreground">{title}</h1>
+      <header className="sticky top-0 z-30 border-b border-border/40 bg-background/85 backdrop-blur-md">
+        <div className="mx-auto flex w-full max-w-2xl items-center justify-between px-5 py-3.5">
+          <div className="min-w-0">
+            <h1 className="truncate font-display text-base font-bold tracking-tight text-foreground">{title}</h1>
             {subtitle ? (
-              <p className="truncate text-xs font-medium text-muted-foreground/80">{subtitle}</p>
+              <p className="truncate text-xs font-normal text-muted-foreground">{subtitle}</p>
             ) : null}
           </div>
           <Sheet>
             <SheetTrigger
-              className="rounded-lg border border-border bg-surface-raised/70 p-2 text-muted-foreground transition-all hover:border-primary/40 hover:text-foreground"
+              className="flex items-center gap-1.5 rounded-lg border border-border/60 bg-surface/70 px-2.5 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:border-primary/40 hover:text-foreground"
               aria-label="More screens"
             >
-              <Menu className="size-5" />
+              <Menu className="size-4" />
+              <span>Menu</span>
             </SheetTrigger>
-            <SheetContent side="right" className="w-72 border-border/80 bg-surface">
-              <SheetTitle className="font-display text-base font-bold text-foreground">Navigation & Depth</SheetTitle>
+            <SheetContent side="right" className="w-72 border-border/60 bg-surface">
+              <SheetTitle className="font-display text-base font-bold text-foreground">Menu & Sanctuary</SheetTitle>
               <nav className="mt-5 flex flex-col gap-1.5">
                 {MORE_NAV.map((item) => (
                   <Link
                     key={item.to}
                     to={item.to}
-                    className="flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-surface-raised hover:text-foreground"
+                    className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-surface-raised hover:text-foreground"
                     activeProps={{ className: "bg-surface-raised font-semibold text-primary" }}
                   >
                     <item.icon className="size-4" />
@@ -115,17 +113,14 @@ export function AppShell({
                   </Link>
                 ))}
               </nav>
-              <p className="mt-6 rounded-lg border border-border/60 bg-background/60 p-3 text-xs leading-relaxed text-muted-foreground">
-                These screens provide depth into memory, plans, and history. Today remains your primary command hub.
-              </p>
             </SheetContent>
           </Sheet>
         </div>
       </header>
 
-      <main className="relative z-10 mx-auto w-full max-w-3xl px-4 pb-28 pt-4">
+      <main className="relative z-10 mx-auto w-full max-w-2xl px-5 pb-28 pt-4">
         {error ? (
-          <div className="mb-4 rounded-xl border border-destructive/50 bg-destructive/10 p-4 text-sm">
+          <div className="mb-4 rounded-xl border border-destructive/40 bg-destructive/10 p-4 text-sm">
             <p className="font-semibold text-destructive">Local storage unavailable</p>
             <p className="mt-1 text-muted-foreground">{error}</p>
           </div>
@@ -135,18 +130,18 @@ export function AppShell({
       </main>
 
       {hideNav ? null : (
-        <nav className="fixed inset-x-0 bottom-0 z-20 border-t border-border/80 bg-surface/90 backdrop-blur-md">
-          <div className="mx-auto flex w-full max-w-3xl items-stretch">
+        <nav className="fixed inset-x-0 bottom-0 z-20 border-t border-border/40 bg-surface/90 backdrop-blur-md">
+          <div className="mx-auto flex w-full max-w-2xl items-stretch">
             {PRIMARY_NAV.map((item) => (
               <Link
                 key={item.to}
                 to={item.to}
-                className="flex flex-1 flex-col items-center gap-1 py-2.5 text-[11px] font-medium text-muted-foreground transition-all hover:text-foreground"
+                className="flex flex-1 flex-col items-center gap-1 py-3 text-[11px] font-medium text-muted-foreground transition-colors hover:text-foreground"
                 activeOptions={{ exact: item.to === "/" }}
                 activeProps={{ className: "font-semibold text-primary" }}
               >
                 <item.icon className="size-5" />
-                <span className="font-display tracking-wide">{item.label}</span>
+                <span className="font-sans">{item.label}</span>
               </Link>
             ))}
           </div>
@@ -158,10 +153,9 @@ export function AppShell({
 
 function ShellSkeleton() {
   return (
-    <div className="space-y-3">
-      <div className="h-24 animate-pulse rounded-lg bg-surface" />
-      <div className="h-40 animate-pulse rounded-lg bg-surface" />
-      <div className="h-16 animate-pulse rounded-lg bg-surface" />
+    <div className="space-y-4 animate-pulse">
+      <div className="h-28 rounded-xl bg-surface/60 border border-border/40" />
+      <div className="h-44 rounded-xl bg-surface/60 border border-border/40" />
     </div>
   );
 }
