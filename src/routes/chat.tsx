@@ -81,12 +81,13 @@ function ChatScreen() {
 
   return (
     <AppShell title="Chat" subtitle="Grounded in your own data">
-      <div className="mb-3 flex items-center justify-between gap-2">
+      <div className="mb-3.5 flex items-center justify-between gap-2">
         <BrainChip />
-        <div className="flex gap-1.5">
+        <div className="flex gap-2">
           <Button
             size="icon-sm"
             variant="outline"
+            className="rounded-lg border-border/80 bg-surface-raised/70 text-muted-foreground hover:border-primary/40 hover:text-foreground"
             aria-label="New conversation"
             onClick={() => void ai.newConversation()}
           >
@@ -94,21 +95,21 @@ function ChatScreen() {
           </Button>
           <Sheet>
             <SheetTrigger asChild>
-              <Button size="sm" variant="outline">
+              <Button size="sm" variant="outline" className="rounded-lg border-border/80 bg-surface-raised/70 text-xs font-semibold text-muted-foreground hover:text-foreground">
                 History
               </Button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-80 bg-surface">
-              <SheetTitle className="font-display">Conversations</SheetTitle>
-              <div className="mt-4 space-y-1">
+            <SheetContent side="right" className="w-80 border-border/80 bg-surface">
+              <SheetTitle className="font-display text-base font-bold text-foreground">Conversation Log</SheetTitle>
+              <div className="mt-4 space-y-1.5">
                 {ai.conversations.length === 0 ? (
-                  <p className="text-xs text-muted-foreground">No conversations yet.</p>
+                  <p className="text-xs text-muted-foreground">No recorded sessions yet.</p>
                 ) : null}
                 {ai.conversations.map((c) => (
-                  <div key={c.id} className="flex items-center gap-1">
+                  <div key={c.id} className="flex items-center gap-1.5">
                     <button
-                      className={`flex-1 truncate rounded-md px-3 py-2 text-left text-sm transition-colors hover:bg-surface-raised ${
-                        c.id === ai.activeConversationId ? "bg-surface-raised text-foreground" : "text-muted-foreground"
+                      className={`flex-1 truncate rounded-lg px-3 py-2 text-left text-xs font-medium transition-colors hover:bg-surface-raised ${
+                        c.id === ai.activeConversationId ? "bg-surface-raised font-bold text-primary" : "text-muted-foreground"
                       }`}
                       onClick={() => void ai.selectConversation(c.id)}
                     >
@@ -117,10 +118,11 @@ function ChatScreen() {
                     <Button
                       size="icon-sm"
                       variant="ghost"
+                      className="text-muted-foreground hover:text-destructive"
                       aria-label={`Delete ${c.title}`}
                       onClick={() => void ai.deleteConversation(c.id)}
                     >
-                      <Trash2 className="size-4" />
+                      <Trash2 className="size-3.5" />
                     </Button>
                   </div>
                 ))}
@@ -131,32 +133,30 @@ function ChatScreen() {
       </div>
 
       {!ai.aiConnected ? (
-        <div className="mb-3 rounded-lg border border-border/60 bg-surface/60 p-3 text-xs text-muted-foreground">
-          <span className="text-foreground">No AI brain connected.</span> Chat still works — your
-          local game intelligence answers from your own records, and every number stays
-          deterministic. Connect Ollama, a phone-local model or an online API in AI Control.
+        <div className="mb-3.5 rounded-xl border border-primary/30 bg-primary/5 p-3.5 text-xs leading-relaxed text-muted-foreground">
+          <span className="font-bold text-primary">Local Intelligence Active.</span> Chat operates deterministically from your own IndexedDB records. Connect Ollama or Cloud in AI Control for enhanced reasoning.
         </div>
       ) : null}
 
-      <Panel className="flex h-[52vh] flex-col p-0">
+      <Panel className="flex h-[54vh] flex-col overflow-hidden border-border/80 bg-surface/90 p-0 shadow-lg">
         <Conversation className="flex-1">
-          <ConversationContent className="gap-4">
+          <ConversationContent className="gap-4 p-4">
             {ai.turns.length === 0 ? (
               <ConversationEmptyState
-                title="Ask about your own life data"
-                description="Momentum, misses, patterns, what to do next — answers are grounded in your records, never invented."
+                title="Grounded Intelligence Terminal"
+                description="Inquire about momentum, behavioral patterns, chapter bottlenecks, or ask for a fresh quest draft. Responses are grounded in your real life records."
               />
             ) : null}
             {ai.turns.map((turn) => (
               <TurnView key={turn.id} turn={turn} />
             ))}
-            {ai.thinking ? <Shimmer className="text-sm">Thinking…</Shimmer> : null}
+            {ai.thinking ? <Shimmer className="text-xs font-semibold text-accent">Reasoning across 6 context layers…</Shimmer> : null}
           </ConversationContent>
           <ConversationScrollButton />
         </Conversation>
-        <div className="border-t border-border/60 p-3">
+        <div className="border-t border-border/80 bg-background/50 p-3">
           <PromptInput onSubmit={submit}>
-            <PromptInputTextarea placeholder="Ask your brain anything about your progress…" />
+            <PromptInputTextarea placeholder="Ask your life brain anything about your goals or daily rhythm…" />
             <PromptInputFooter className="justify-end">
               <PromptInputSubmit status={ai.thinking ? "submitted" : "ready"} />
             </PromptInputFooter>

@@ -85,37 +85,38 @@ export function AppShell({
     >
       <div className="pointer-events-none absolute inset-0 grid-backdrop" aria-hidden />
 
-      <header className="relative z-10 border-b border-border/60 bg-surface/60 backdrop-blur">
-        <div className="mx-auto flex w-full max-w-3xl items-center gap-3 px-4 py-3">
+      <header className="sticky top-0 z-30 border-b border-border/80 bg-background/80 backdrop-blur-md">
+        <div className="mx-auto flex w-full max-w-3xl items-center gap-3 px-4 py-3.5">
           <div className="min-w-0 flex-1">
-            <h1 className="truncate font-display text-lg font-semibold tracking-wide">{title}</h1>
+            <h1 className="truncate font-display text-lg font-bold tracking-wide text-foreground">{title}</h1>
             {subtitle ? (
-              <p className="truncate text-xs text-muted-foreground">{subtitle}</p>
+              <p className="truncate text-xs font-medium text-muted-foreground/80">{subtitle}</p>
             ) : null}
           </div>
           <Sheet>
             <SheetTrigger
-              className="rounded-md border border-border bg-surface-raised p-2 text-muted-foreground transition-colors hover:text-foreground"
+              className="rounded-lg border border-border bg-surface-raised/70 p-2 text-muted-foreground transition-all hover:border-primary/40 hover:text-foreground"
               aria-label="More screens"
             >
               <Menu className="size-5" />
             </SheetTrigger>
-            <SheetContent side="right" className="w-72 bg-surface">
-              <SheetTitle className="font-display">More</SheetTitle>
-              <nav className="mt-4 flex flex-col gap-1">
+            <SheetContent side="right" className="w-72 border-border/80 bg-surface">
+              <SheetTitle className="font-display text-base font-bold text-foreground">Navigation & Depth</SheetTitle>
+              <nav className="mt-5 flex flex-col gap-1.5">
                 {MORE_NAV.map((item) => (
                   <Link
                     key={item.to}
                     to={item.to}
-                    className="rounded-md px-3 py-2.5 text-sm text-muted-foreground transition-colors hover:bg-surface-raised hover:text-foreground"
-                    activeProps={{ className: "bg-surface-raised text-foreground" }}
+                    className="flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-surface-raised hover:text-foreground"
+                    activeProps={{ className: "bg-surface-raised font-semibold text-primary" }}
                   >
+                    <item.icon className="size-4" />
                     {item.label}
                   </Link>
                 ))}
               </nav>
-              <p className="mt-6 rounded-md border border-border/60 bg-background/40 p-3 text-xs text-muted-foreground">
-                These screens are for depth. Today is the only place you need to start from.
+              <p className="mt-6 rounded-lg border border-border/60 bg-background/60 p-3 text-xs leading-relaxed text-muted-foreground">
+                These screens provide depth into memory, plans, and history. Today remains your primary command hub.
               </p>
             </SheetContent>
           </Sheet>
@@ -124,8 +125,8 @@ export function AppShell({
 
       <main className="relative z-10 mx-auto w-full max-w-3xl px-4 pb-28 pt-4">
         {error ? (
-          <div className="mb-4 rounded-lg border border-destructive/50 bg-destructive/10 p-4 text-sm">
-            <p className="font-medium">Local storage unavailable</p>
+          <div className="mb-4 rounded-xl border border-destructive/50 bg-destructive/10 p-4 text-sm">
+            <p className="font-semibold text-destructive">Local storage unavailable</p>
             <p className="mt-1 text-muted-foreground">{error}</p>
           </div>
         ) : null}
@@ -134,15 +135,15 @@ export function AppShell({
       </main>
 
       {hideNav ? null : (
-        <nav className="fixed inset-x-0 bottom-0 z-20 border-t border-border/60 bg-surface/90 backdrop-blur">
+        <nav className="fixed inset-x-0 bottom-0 z-20 border-t border-border/80 bg-surface/90 backdrop-blur-md">
           <div className="mx-auto flex w-full max-w-3xl items-stretch">
             {PRIMARY_NAV.map((item) => (
               <Link
                 key={item.to}
                 to={item.to}
-                className="flex flex-1 flex-col items-center gap-1 py-2.5 text-[11px] text-muted-foreground transition-colors"
+                className="flex flex-1 flex-col items-center gap-1 py-2.5 text-[11px] font-medium text-muted-foreground transition-all hover:text-foreground"
                 activeOptions={{ exact: item.to === "/" }}
-                activeProps={{ className: "text-primary" }}
+                activeProps={{ className: "font-semibold text-primary" }}
               >
                 <item.icon className="size-5" />
                 <span className="font-display tracking-wide">{item.label}</span>

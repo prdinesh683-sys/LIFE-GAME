@@ -68,31 +68,37 @@ function RecoveryPage() {
   return (
     <AppShell title="Recovery 🛟" subtitle="Comeback, not catch-up">
       <div className="space-y-4">
-        <Panel glow>
-          <Pill tone={needsRecovery ? "accent" : "primary"}>
-            {needsRecovery ? "Momentum is low" : "Momentum is holding"}
-          </Pill>
-          <h2 className="mt-3 font-display text-xl font-semibold leading-snug">
+        <Panel glow className="border-focus/40 bg-gradient-to-br from-surface-raised/90 via-surface to-background p-5 shadow-lg">
+          <div className="flex items-center justify-between gap-2">
+            <Pill tone={needsRecovery ? "primary" : "focus"}>
+              {needsRecovery ? "Momentum in Reset Window" : "Momentum Holding Steady"}
+            </Pill>
+            <span className="text-xs font-semibold text-focus">Zero Debt Sanctuary</span>
+          </div>
+          <h2 className="mt-3 font-display text-2xl font-black leading-snug text-foreground">
             Nothing to make up for.
           </h2>
-          <p className="mt-2 text-sm text-muted-foreground">
-            There is no debt in this game. One small real action restarts everything — your Run
-            grace period and your Momentum both respond to the next thing you actually do.
+          <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">
+            There is no penalty or debt in this game. One small real action restarts your Momentum and restores your grace period immediately.
           </p>
         </Panel>
 
         {option ? (
-          <Panel>
-            <SectionTitle>Smallest useful move</SectionTitle>
-            <p className="font-display text-lg font-semibold">{option.title}</p>
-            <p className="mt-1 text-sm text-muted-foreground">{option.reason}</p>
-            <div className="mt-2 flex flex-wrap gap-1.5">
-              <Pill>{option.durationMinutes}m</Pill>
-              <Pill tone="spark">{option.sparks} Sparks</Pill>
+          <Panel glow className="space-y-4 border-primary/40 bg-surface-raised/90 p-5 shadow-xl">
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-primary">Smallest Useful Action</span>
+              <div className="flex items-center gap-1.5">
+                <Pill tone="spark">{option.durationMinutes}m</Pill>
+                <Pill tone="spark">+{option.sparks} ✨</Pill>
+              </div>
+            </div>
+            <div className="space-y-1">
+              <p className="font-display text-xl font-black text-foreground">{option.title}</p>
+              <p className="text-xs leading-relaxed text-muted-foreground">{option.reason}</p>
             </div>
             <Button
               size="lg"
-              className="mt-4 w-full"
+              className="w-full font-bold shadow-md hover:brightness-110"
               disabled={busy}
               onClick={async () => {
                 setBusy(true);
@@ -108,65 +114,67 @@ function RecoveryPage() {
                 }
               }}
             >
-              Start the comeback
+              Start the comeback ({option.durationMinutes}m)
             </Button>
           </Panel>
         ) : null}
 
-        <Panel className="space-y-3">
+        <Panel className="space-y-3.5 border-border/80 bg-surface/80 p-5">
           <SectionTitle
             action={
               analysis ? (
-                <Pill tone={analysis.source === "ai" ? "primary" : "muted"}>
+                <Pill tone={analysis.source === "ai" ? "accent" : "muted"}>
                   {analysis.source === "ai" ? (analysis.brain ?? "AI") : "Local engine"}
                 </Pill>
               ) : null
             }
           >
-            Behavioral read
+            Behavioral Read & Intelligence
           </SectionTitle>
           {analysis ? (
-            <div className="space-y-3 text-sm">
+            <div className="space-y-3.5 text-sm">
               {(
                 [
-                  ["Confirmed", analysis.data.confirmed_facts],
-                  ["Patterns", analysis.data.observed_patterns],
+                  ["Confirmed Facts", analysis.data.confirmed_facts],
+                  ["Observed Patterns", analysis.data.observed_patterns],
                   ["Hypotheses", analysis.data.hypotheses],
-                  ["Likely drains", analysis.data.possible_drains],
-                  ["What works", analysis.data.successful_boosts],
-                  ["Experiments to try", analysis.data.recommended_experiments],
+                  ["Possible Drains", analysis.data.possible_drains],
+                  ["Successful Boosts", analysis.data.successful_boosts],
+                  ["Recommended Experiments", analysis.data.recommended_experiments],
                 ] as const
               )
                 .filter(([, items]) => items.length > 0)
                 .map(([label, items]) => (
-                  <div key={label}>
-                    <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">{label}</p>
-                    <ul className="mt-1 space-y-1">
+                  <div key={label} className="rounded-lg border border-border/50 bg-background/50 p-3">
+                    <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-primary">{label}</p>
+                    <ul className="mt-1.5 space-y-1">
                       {items.map((item) => (
-                        <li key={item} className="text-muted-foreground">
-                          · {item}
+                        <li key={item} className="text-xs text-muted-foreground">
+                          • {item}
                         </li>
                       ))}
                     </ul>
                   </div>
                 ))}
-              <p className="text-[11px] text-muted-foreground">
-                Nothing here changes your state until you approve it. Confidence: {analysis.data.confidence}
+              <p className="text-[11px] text-muted-foreground/80">
+                Nothing here modifies your game state until you approve it.
               </p>
             </div>
           ) : (
-            <p className="text-sm text-muted-foreground">
-              Ask for a read on your last weeks: what held, what slipped, and what to test next.
+            <p className="text-xs leading-relaxed text-muted-foreground">
+              Request a behavioral read on your recent days to see what held, what drained energy, and what micro-experiment to test next.
             </p>
           )}
+
           <Button
             variant="outline"
-            className="w-full"
+            size="sm"
+            className="w-full text-xs font-semibold"
             disabled={ai.thinking}
             onClick={() => void runAnalysis()}
           >
-            <Brain className="mr-1 size-4" />
-            {ai.thinking ? "Thinking…" : analysis ? "Re-analyze" : "Analyze my patterns"}
+            <Brain className="mr-1.5 size-3.5" />
+            {ai.thinking ? "Analyzing behavior…" : "Ask for a behavioral read"}
           </Button>
         </Panel>
 

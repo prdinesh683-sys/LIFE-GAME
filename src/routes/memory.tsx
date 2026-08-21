@@ -136,25 +136,28 @@ function MemoryPage() {
   return (
     <AppShell title="Memory 🧠" subtitle="What the game remembers, and why">
       <div className="space-y-4">
-        <Panel>
-          <SectionTitle>When I follow through</SectionTitle>
+        <Panel glow className="border-accent/40 bg-surface-raised/90 p-5 shadow-lg">
+          <SectionTitle>Follow-Through Rhythms</SectionTitle>
           {followThrough.hasEvidence ? (
-            <ul className="mt-1 space-y-1 text-sm">
+            <ul className="mt-1.5 space-y-1.5 text-xs text-foreground">
               {followThrough.slots.map((slot) => (
-                <li key={slot.slot}>{slot.label}</li>
+                <li key={slot.slot} className="flex items-center gap-2">
+                  <span className="text-accent">▸</span>
+                  <span>{slot.label}</span>
+                </li>
               ))}
             </ul>
           ) : (
-            <p className="mt-1 text-sm text-muted-foreground">{followThrough.headline}</p>
+            <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{followThrough.headline}</p>
           )}
         </Panel>
 
-        <Panel>
-          <SectionTitle>Memory health</SectionTitle>
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+        <Panel className="space-y-3.5 border-border/80 bg-surface/80 p-5">
+          <SectionTitle>Memory Health & Optimization</SectionTitle>
+          <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
             <StatTile label="Active" value={health.active} />
             <StatTile label="Patterns" value={health.patterns} />
-            <StatTile label="Health" value={`${health.score}`} hint={health.band} tone="momentum" />
+            <StatTile label="Integrity" value={`${health.score}`} hint={health.band} tone="momentum" />
             <StatTile label="Duplicates" value={health.duplicateGroups} />
           </div>
           <ul className="mt-3 space-y-1 text-xs text-muted-foreground">
@@ -162,49 +165,52 @@ function MemoryPage() {
               <li key={note}>• {note}</li>
             ))}
           </ul>
-          <div className="mt-3 flex flex-wrap gap-2">
+          <div className="mt-3.5 flex flex-wrap gap-2">
             <Button
               size="sm"
               variant="outline"
+              className="text-xs font-semibold"
               disabled={busy}
               onClick={() => void run("Patterns updated", ai.refreshPatterns)}
             >
-              <Sparkles className="mr-1 size-4" /> Review patterns
+              <Sparkles className="mr-1.5 size-3.5 text-primary" /> Review patterns
             </Button>
             <Button
               size="sm"
               variant="outline"
+              className="text-xs font-semibold"
               disabled={busy}
               onClick={() => void run("Duplicate groups merged", ai.consolidateDuplicates)}
             >
-              <Layers className="mr-1 size-4" /> Consolidate duplicates
+              <Layers className="mr-1.5 size-3.5 text-accent" /> Consolidate duplicates
             </Button>
           </div>
         </Panel>
 
         {ai.memoryProposals.length ? (
-          <Panel>
-            <SectionTitle>Suggested by AI — waiting for you</SectionTitle>
-            <p className="text-xs text-muted-foreground">
-              The AI can suggest what to remember. Nothing is stored until you accept it, and
-              anything without evidence from your own records stays a hypothesis.
+          <Panel glow className="space-y-3.5 border-primary/40 bg-surface-raised/90 p-5 shadow-xl">
+            <SectionTitle>Suggested by AI — Waiting for Approval</SectionTitle>
+            <p className="text-xs leading-relaxed text-muted-foreground">
+              The AI proposes observations from recent sessions. Nothing is committed until you confirm it.
             </p>
-            <ul className="mt-3 space-y-2">
+            <ul className="mt-3 space-y-2.5">
               {ai.memoryProposals.map((proposal) => (
-                <li key={proposal.id} className="panel px-3 py-2">
-                  <p className="text-sm font-medium">{proposal.title}</p>
-                  <ul className="mt-1 space-y-1 text-xs text-muted-foreground">
+                <li key={proposal.id} className="rounded-lg border border-border/70 bg-background/50 p-3.5">
+                  <p className="font-display text-sm font-bold text-foreground">{proposal.title}</p>
+                  <ul className="mt-2 space-y-1.5 text-xs text-muted-foreground">
                     {((proposal.payload as { drafts?: { kind: string; text: string }[] }).drafts ?? []).map(
                       (draft, index) => (
-                        <li key={`${proposal.id}-${index}`}>
-                          <Pill>{KIND_LABEL[draft.kind] ?? draft.kind}</Pill> {draft.text}
+                        <li key={`${proposal.id}-${index}`} className="flex items-center gap-2">
+                          <Pill tone="spark">{KIND_LABEL[draft.kind] ?? draft.kind}</Pill>
+                          <span>{draft.text}</span>
                         </li>
                       ),
                     )}
                   </ul>
-                  <div className="mt-2 flex flex-wrap gap-2">
+                  <div className="mt-3 flex flex-wrap gap-2">
                     <Button
                       size="sm"
+                      className="font-bold text-xs"
                       disabled={busy}
                       onClick={() => void run("Remembered", () => ai.decideProposal(proposal.id, "approved"))}
                     >
@@ -213,6 +219,7 @@ function MemoryPage() {
                     <Button
                       size="sm"
                       variant="ghost"
+                      className="text-xs text-muted-foreground hover:text-foreground"
                       disabled={busy}
                       onClick={() => void run("Dismissed", () => ai.decideProposal(proposal.id, "rejected"))}
                     >
@@ -231,6 +238,7 @@ function MemoryPage() {
               key={value}
               size="sm"
               variant={tab === value ? "default" : "outline"}
+              className="text-xs font-semibold"
               onClick={() => setTab(value)}
             >
               {value === "active"

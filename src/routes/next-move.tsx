@@ -173,21 +173,23 @@ function NextMovePage() {
         </div>
 
         {primary ? (
-          <Panel glow>
+          <Panel glow className="space-y-4 border-primary/40 bg-surface-raised/90 p-5 shadow-xl">
             <SectionTitle
-              action={<Pill tone="accent">{primary.rush ? "Rush" : primary.category}</Pill>}
+              action={<Pill tone="spark">{primary.rush ? "Rush" : primary.category}</Pill>}
             >
-              Recommended
+              Primary Recommendation
             </SectionTitle>
-            <h2 className="font-display text-2xl font-semibold leading-snug">{primary.title}</h2>
-            <p className="mt-2 text-sm text-muted-foreground">{primary.reason}</p>
-            <div className="mt-3 flex flex-wrap gap-1.5">
-              <Pill>{primary.durationMinutes}m</Pill>
+            <div className="space-y-1">
+              <h2 className="font-display text-2xl font-black tracking-tight text-foreground">{primary.title}</h2>
+              <p className="text-xs leading-relaxed text-muted-foreground">{primary.reason}</p>
+            </div>
+            <div className="flex flex-wrap gap-1.5 pt-1">
+              <Pill tone="spark">{primary.durationMinutes}m</Pill>
               <Pill tone="spark">
                 <Sparkles className="size-3" />
-                {primary.sparks}
+                {primary.sparks} Sparks
               </Pill>
-              <Pill tone="primary">{ATTRIBUTE_LABELS[primary.attribute]}</Pill>
+              <Pill tone="accent">{ATTRIBUTE_LABELS[primary.attribute]}</Pill>
               {primary.destinationTitle ? <Pill>{primary.destinationTitle}</Pill> : null}
               {primary.rush ? (
                 <Pill tone="accent">
@@ -198,18 +200,18 @@ function NextMovePage() {
             </div>
             <Button
               size="lg"
-              className="mt-4 w-full"
+              className="w-full font-bold shadow-md hover:brightness-110"
               disabled={busy !== null || activeRun !== null}
               onClick={() => void accept(primary)}
             >
               <Zap className="size-5" />
-              Start now ({primary.durationMinutes}m)
+              Start this ({primary.durationMinutes}m)
             </Button>
             {primary.minimumWin ? (
               <Button
                 variant="outline"
                 size="sm"
-                className="mt-2 w-full border-primary/40 text-xs"
+                className="w-full border-primary/40 bg-primary/10 text-xs font-bold text-primary transition-all hover:bg-primary/20 hover:border-primary"
                 disabled={busy !== null || activeRun !== null}
                 onClick={() =>
                   void accept({
@@ -220,17 +222,18 @@ function NextMovePage() {
                   })
                 }
               >
-                🌱 Low Energy / Can&apos;t start? Minimum Win: {primary.minimumWin.durationMinutes}m Micro
+                ⚡ Start 5m Minimum Win: {primary.minimumWin.durationMinutes}m micro-action
               </Button>
             ) : null}
             <Button
               variant="ghost"
-              className="mt-2 w-full"
+              size="sm"
+              className="w-full text-xs text-muted-foreground hover:text-foreground"
               onClick={() => setSeed((s) => s + 1)}
               disabled={busy !== null}
             >
-              <RefreshCw className="size-4" />
-              Something else
+              <RefreshCw className="size-3.5 mr-1" />
+              Show something else
             </Button>
           </Panel>
         ) : (
@@ -243,45 +246,45 @@ function NextMovePage() {
 
         {alternatives.length ? (
           <div>
-            <SectionTitle>Other moves</SectionTitle>
+            <SectionTitle>Other Available Next Moves</SectionTitle>
             <div className="space-y-3">
               {alternatives.map((option) => (
-                <article key={option.id} className="panel p-4">
+                <Panel key={option.id} className="space-y-3 border-border/70 bg-surface/80 p-4 transition-colors hover:border-border">
                   <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <h3 className="font-display text-base font-semibold leading-snug">
+                    <div className="min-w-0 flex-1 space-y-1">
+                      <h3 className="font-display text-base font-bold leading-snug text-foreground">
                         {option.title}
                       </h3>
-                      <p className="mt-1 text-sm text-muted-foreground">{option.reason}</p>
+                      <p className="text-xs text-muted-foreground">{option.reason}</p>
                     </div>
                     <span className="numeric shrink-0 text-sm font-bold text-spark">
-                      {option.sparks}
+                      +{option.sparks} ✨
                     </span>
                   </div>
-                  <div className="mt-3 flex flex-wrap gap-1.5">
-                    <Pill>{option.durationMinutes}m</Pill>
-                    <Pill>{option.category}</Pill>
-                    <Pill tone="primary">{ATTRIBUTE_LABELS[option.attribute]}</Pill>
-                    {option.isRecovery ? <Pill tone="accent">Recovery 🛟</Pill> : null}
+                  <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border/40 pt-2">
+                    <div className="flex items-center gap-1.5">
+                      <Pill tone="spark">{option.durationMinutes}m</Pill>
+                      <Pill tone="muted">{ATTRIBUTE_LABELS[option.attribute]}</Pill>
+                      {option.isRecovery ? <Pill tone="focus">Recovery 🛟</Pill> : null}
+                    </div>
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      className="text-xs font-semibold"
+                      disabled={busy !== null || activeRun !== null}
+                      onClick={() => void accept(option)}
+                    >
+                      Start this
+                    </Button>
                   </div>
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    className="mt-3 w-full"
-                    disabled={busy !== null || activeRun !== null}
-                    onClick={() => void accept(option)}
-                  >
-                    Take this instead
-                  </Button>
-                </article>
+                </Panel>
               ))}
             </div>
           </div>
         ) : null}
 
         <p className="pb-2 text-center text-xs text-muted-foreground">
-          Options come from the deterministic engine. When an AI brain is connected it can propose
-          moves here too — you still approve every one.
+          Options come from your deterministic engine. The AI proposes candidates; you decide every start.
         </p>
       </div>
     </AppShell>
